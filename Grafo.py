@@ -22,6 +22,32 @@ class Grafo:
     self.iniciar_matriz_custo()
     for arco in self.vetor_arestas:
       self.custo[arco[0] - 1][arco[1] - 1] = grafo.custo[arco[1] - 1][arco[0] - 1]
+  
+  def iniciarGrafoResidual(self, grafo: 'Grafo'):
+    self.vertices = grafo.qtdVertices()
+    self.arestas = grafo.qtdArestas()
+    self.vetor_arestas = grafo.vetor_arestas.copy()
+    self.rotulos = grafo.rotulos.copy()
+    self.dirigido = grafo.dirigido
+    self.iniciar_matriz_custo_residual()
+    vertices_artificiais = 0
+    pular_aresta = []
+    for i in range(self.vertices):
+      for j in range(self.vertices):
+        if ((i + 1, j + 1) in grafo.vetor_arestas) and ((j + 1, i + 1) in grafo.vetor_arestas) and ((i, j) not in pular_aresta and (j, i) not in pular_aresta):
+          self.custo.append([0] * (self.vertices + vertices_artificiais))
+          for linha in self.custo:
+            linha.append(0)
+          vertices_artificiais += 1
+          pular_aresta.append((j, i))
+          self.custo[i][self.vertices - 1 + vertices_artificiais] = grafo.custo[i][j]
+          self.custo[self.vertices - 1 + vertices_artificiais][i] = 0
+          self.custo[self.vertices - 1 + vertices_artificiais][j] = grafo.custo[i][j]
+          self.custo[j][self.vertices - 1 + vertices_artificiais] = 0
+          self.custo[i][j] = 0
+        elif grafo.custo[i][j] != math.inf:
+          self.custo[i][j] = grafo.custo[i][j]
+    self.vertices += vertices_artificiais
 
   def qtdVertices(self):
     return self.vertices
@@ -125,3 +151,8 @@ class Grafo:
       self.custo.append([math.inf] * self.vertices)
     for i in range(self.vertices):
       self.custo[i][i] = 0
+  
+  def iniciar_matriz_custo_residual(self):
+    self.custo = []
+    for i in range(self.vertices):
+      self.custo.append([0] * self.vertices)
